@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Các Trạng Thái Của Vật Chất: Rắn - Lỏng - Khí</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Font Google: Be Vietnam Pro cho tiếng Việt sắc nét -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 16s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Hiệu ứng Glassmorphism cao cấp */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255, 255, 255, 0.28);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 45px -10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Chuyển cảnh Slide mượt mà */
+        .slide-container {
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .slide-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96) translateY(15px);
+            position: absolute;
+            inset: 0;
+        }
+
+        .slide-active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1) translateY(0);
+            position: relative;
+        }
+
+        /* Nền chuyển màu động theo từng Slide */
+        .bg-theme-0 {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #312e81 100%);
+        }
+        .bg-theme-1 {
+            background: linear-gradient(135deg, #064e3b 0%, #0f766e 45%, #1e3a8a 100%);
+        }
+        .bg-theme-2 {
+            background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 50%, #06b6d4 100%);
+        }
+        .bg-theme-3 {
+            background: linear-gradient(135deg, #3b0764 0%, #6d28d9 48%, #db2777 100%);
+        }
+    </style>
+</head>
+<body id="app-body" class="bg-theme-0 text-white min-h-screen flex flex-col justify-between transition-colors duration-1000 relative">
+
+    <!-- Canvas Hạt Nền Động -->
+    <canvas id="bg-particles-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Thanh Header gọn gàng (Đã bỏ thanh tab chuyển slide) -->
+    <header class="relative z-20 w-full px-4 sm:px-8 pt-4 pb-2 flex items-center justify-between gap-3">
+        <div onclick="goToSlide(0)" class="cursor-pointer flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg group-hover:bg-white/30 transition">
+                <svg class="w-6 h-6 text-white animate-spin-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(30 12 12)"/>
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(150 12 12)"/>
+                    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(90 12 12)"/>
+                </svg>
+            </div>
+            <div>
+                <span class="text-xs uppercase tracking-widest text-white/70 font-semibold block">Khoa Học Tự Nhiên</span>
+                <h1 class="text-sm sm:text-base font-bold tracking-tight">Trạng Thái Của Vật Chất</h1>
+            </div>
+        </div>
+
+        <!-- Nút điều khiển nhanh: Về trang chủ & Toàn màn hình -->
+        <div class="flex items-center gap-2">
+            <button onclick="goToSlide(0)" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-xs sm:text-sm font-semibold transition-all active:scale-95" title="Trang mở đầu">
+                Trang chủ
+            </button>
+            <button onclick="toggleFullScreen()" class="p-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 transition-all active:scale-95" title="Toàn màn hình">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- KHU VỰC TRÌNH CHIẾU CHÍNH -->
+    <main class="relative z-10 flex-1 flex items-center justify-center w-full max-w-7xl mx-auto px-4 sm:px-8 py-4">
+        <div class="w-full relative min-h-[540px] flex items-center justify-center">
+
+            <!-- ================= SLIDE 0: TRANG MỞ ĐẦU ================= -->
+            <section id="slide-0" class="slide-container slide-active w-full">
+                <div class="glass-panel rounded-3xl p-6 sm:p-12 md:p-14 text-center relative overflow-hidden">
+                    <div class="absolute -top-24 -left-24 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-400/25 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-xs sm:text-sm font-medium text-cyan-200 mb-6">
+                        <span>✨ Bài Giảng Trực Quan Tương Tác</span>
+                    </div>
+
+                    <h2 class="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight mb-5 bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-indigo-200">
+                        Các Trạng Thái Của Vật Chất
+                    </h2>
+                    <p class="text-base sm:text-xl text-white/85 max-w-2xl mx-auto font-normal leading-relaxed mb-10">
+                        Khám phá thế giới kỳ diệu của <span class="font-bold text-emerald-300">Chất Rắn</span>, <span class="font-bold text-sky-300">Chất Lỏng</span> và <span class="font-bold text-pink-300">Chất Khí</span> thông qua hình ảnh minh họa sinh động và mô phỏng cấu trúc phân tử.
+                    </p>
+
+                    <!-- 3 Thẻ Tóm Tắt Nhanh -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto mb-10">
+                        <div onclick="goToSlide(1)" class="cursor-pointer glass-card rounded-2xl p-5 text-left group">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/30 border border-emerald-300/40 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg class="w-7 h-7 text-emerald-200" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L2 8l10 14L22 8 12 2zm0 2.8L18.5 8 12 18.2 5.5 8 12 4.8z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-emerald-200">01. Chất Rắn (Solid)</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mt-1">Hình dạng & thể tích cố định, phân tử liên kết bền chặt.</p>
+                        </div>
+
+                        <div onclick="goToSlide(2)" class="cursor-pointer glass-card rounded-2xl p-5 text-left group">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-500/30 border border-sky-300/40 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg class="w-7 h-7 text-sky-200" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-sky-200">02. Chất Lỏng (Liquid)</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mt-1">Thể tích xác định, chảy được và mang hình dạng vật chứa.</p>
+                        </div>
+
+                        <div onclick="goToSlide(3)" class="cursor-pointer glass-card rounded-2xl p-5 text-left group">
+                            <div class="w-12 h-12 rounded-2xl bg-pink-500/30 border border-pink-300/40 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg class="w-7 h-7 text-pink-200" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-pink-200">03. Chất Khí (Gas)</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mt-1">Không có hình dạng & thể tích cố định, lan tỏa tự do.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="nextSlide()" class="px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold text-base sm:text-lg shadow-xl hover:bg-cyan-50 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-3">
+                        <span>Bắt Đầu Khám Phá</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ================= SLIDE 1: CHẤT RẮN (SOLID) ================= -->
+            <section id="slide-1" class="slide-container slide-hidden w-full">
+                <div class="glass-panel rounded-3xl p-5 sm:p-8 md:p-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center mb-7">
+                        <div class="lg:col-span-8">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-400/25 border border-emerald-300/40 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-3">
+                                Trạng Thái 01 / 03
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">
+                                Chất Rắn <span class="text-emerald-300 font-semibold text-2xl sm:text-3xl">(Solid)</span>
+                            </h2>
+                            <p class="text-sm sm:text-base text-white/90 leading-relaxed mb-4">
+                                Ở thể rắn, các hạt phân tử nằm sát nhau và sắp xếp theo một trật tự nhất định. Lực liên kết giữa chúng rất mạnh nên các phân tử chỉ dao động tại chỗ.
+                            </p>
+                            <div class="flex flex-wrap gap-2.5">
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-emerald-200">✓ Hình dạng xác định</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-emerald-200">✓ Thể tích cố định</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-emerald-200">✓ Rất khó bị nén</span>
+                            </div>
+                        </div>
+
+                        <!-- Hộp Mô Phỏng Phân Tử Chất Rắn (Mạng tinh thể liên kết chặt) -->
+                        <div class="lg:col-span-4 bg-black/30 rounded-2xl p-3.5 border border-white/20 flex flex-col items-center">
+                            <div class="w-full flex justify-between items-center mb-2 px-1">
+                                <span class="text-xs font-bold text-emerald-200 uppercase tracking-wider">Mô phỏng phân tử</span>
+                                <span class="text-[11px] text-emerald-100 bg-emerald-500/25 border border-emerald-400/30 px-2 py-0.5 rounded-md">Mạng tinh thể • Rung tại chỗ</span>
+                            </div>
+                            <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-950/80 border border-emerald-400/40 relative shadow-inner">
+                                <canvas id="canvas-solid" class="w-full h-full block"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Thẻ Ví Dụ Chất Rắn -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <!-- Ví dụ 1: Viên Kim Cương -->
+                        <div onclick="openDetailModal('diamond')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-emerald-900/40 to-teal-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(52,211,153,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="diaTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#e0f2fe"/>
+                                            <stop offset="50%" stop-color="#67e8f9"/>
+                                            <stop offset="100%" stop-color="#06b6d4"/>
+                                        </linearGradient>
+                                        <linearGradient id="diaLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#38bdf8"/>
+                                            <stop offset="100%" stop-color="#1d4ed8"/>
+                                        </linearGradient>
+                                        <linearGradient id="diaCenter" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#a5f3fc"/>
+                                            <stop offset="100%" stop-color="#0284c7"/>
+                                        </linearGradient>
+                                        <linearGradient id="diaRight" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#0ea5e9"/>
+                                            <stop offset="100%" stop-color="#1e3a8a"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <polygon points="60,40 140,40 175,80 25,80" fill="url(#diaTop)"/>
+                                    <polygon points="60,40 140,40 125,80 75,80" fill="#ffffff" opacity="0.45"/>
+                                    <polygon points="25,80 75,80 100,170" fill="url(#diaLeft)"/>
+                                    <polygon points="75,80 125,80 100,170" fill="url(#diaCenter)"/>
+                                    <polygon points="125,80 175,80 100,170" fill="url(#diaRight)"/>
+                                    <polyline points="60,40 75,80 100,170 125,80 140,40" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>
+                                    <line x1="25" y1="80" x2="175" y2="80" stroke="#ffffff" stroke-width="1.5" opacity="0.8"/>
+                                    <path d="M42,32 L45,42 L55,45 L45,48 L42,58 L39,48 L29,45 L39,42 Z" fill="#ffffff"/>
+                                    <circle cx="158" cy="52" r="3" fill="#ffffff" opacity="0.9"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 1</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">1. Viên Kim Cương</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Cấu trúc tinh thể cacbon siêu bền vững, độ cứng cao nhất trong tự nhiên.</p>
+                            <span class="mt-auto text-xs font-semibold text-emerald-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 2: Khối Băng Đá -->
+                        <div onclick="openDetailModal('ice')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-cyan-900/40 to-blue-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(56,189,248,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float-delayed" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="iceTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#f0f9ff"/>
+                                            <stop offset="100%" stop-color="#7dd3fc"/>
+                                        </linearGradient>
+                                        <linearGradient id="iceLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#38bdf8"/>
+                                            <stop offset="100%" stop-color="#0369a1"/>
+                                        </linearGradient>
+                                        <linearGradient id="iceRight" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#0284c7"/>
+                                            <stop offset="100%" stop-color="#1e3a8a"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M100,32 L162,66 L100,100 L38,66 Z" fill="url(#iceTop)" stroke="#e0f2fe" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M38,66 L100,100 L100,168 L38,134 Z" fill="url(#iceLeft)" stroke="#bae6fd" stroke-width="1.5" stroke-linejoin="round"/>
+                                    <path d="M100,100 L162,66 L162,134 L100,168 Z" fill="url(#iceRight)" stroke="#7dd3fc" stroke-width="1.5" stroke-linejoin="round"/>
+                                    <path d="M55,85 L85,102 L85,140" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+                                    <path d="M115,112 L145,95" fill="none" stroke="#e0f2fe" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                                    <ellipse cx="100" cy="176" rx="45" ry="7" fill="#38bdf8" opacity="0.35"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 2</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">2. Khối Băng Đá</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Nước đông đặc ở nhiệt độ dưới 0°C, tạo thành khối rắn giữ nguyên hình dạng.</p>
+                            <span class="mt-auto text-xs font-semibold text-emerald-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 3: Thanh Sắt / Kim Loại -->
+                        <div onclick="openDetailModal('iron')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-slate-800/50 to-indigo-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(148,163,184,0.4)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="metalTop" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f8fafc"/>
+                                            <stop offset="50%" stop-color="#cbd5e1"/>
+                                            <stop offset="100%" stop-color="#94a3b8"/>
+                                        </linearGradient>
+                                        <linearGradient id="metalFront" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#94a3b8"/>
+                                            <stop offset="50%" stop-color="#64748b"/>
+                                            <stop offset="100%" stop-color="#334155"/>
+                                        </linearGradient>
+                                        <linearGradient id="metalSide" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#475569"/>
+                                            <stop offset="100%" stop-color="#1e293b"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <polygon points="52,65 128,45 162,62 86,84" fill="url(#metalTop)" stroke="#f1f5f9" stroke-width="1.5"/>
+                                    <polygon points="35,115 52,65 86,84 74,142" fill="url(#metalFront)" stroke="#cbd5e1" stroke-width="1.5"/>
+                                    <polygon points="86,84 162,62 174,112 74,142" fill="url(#metalSide)" stroke="#94a3b8" stroke-width="1.5"/>
+                                    <line x1="62" y1="68" x2="125" y2="51" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+                                    <ellipse cx="105" cy="155" rx="60" ry="8" fill="#0f172a" opacity="0.45"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 3</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">3. Thanh Sắt / Kim Loại</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Vật liệu kim loại rắn chắc, chịu lực tốt, dẫn điện và dẫn nhiệt cao.</p>
+                            <span class="mt-auto text-xs font-semibold text-emerald-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= SLIDE 2: CHẤT LỎNG (LIQUID) ================= -->
+            <section id="slide-2" class="slide-container slide-hidden w-full">
+                <div class="glass-panel rounded-3xl p-5 sm:p-8 md:p-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center mb-7">
+                        <div class="lg:col-span-8">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-400/25 border border-sky-300/40 text-sky-100 text-xs font-bold uppercase tracking-wider mb-3">
+                                Trạng Thái 02 / 03
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">
+                                Chất Lỏng <span class="text-cyan-200 font-semibold text-2xl sm:text-3xl">(Liquid)</span>
+                            </h2>
+                            <p class="text-sm sm:text-base text-white/90 leading-relaxed mb-4">
+                                Ở thể lỏng, các phân tử vẫn ở gần nhau nhưng không cố định một chỗ mà có thể trượt lên nhau dễ dàng. Nhờ vậy, chất lỏng có khả năng chảy và thay đổi hình dạng theo bình chứa.
+                            </p>
+                            <div class="flex flex-wrap gap-2.5">
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-cyan-200">✓ Không có hình dạng cố định</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-cyan-200">✓ Thể tích xác định</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-cyan-200">✓ Chảy được tự do</span>
+                            </div>
+                        </div>
+
+                        <!-- Hộp Mô Phỏng Phân Tử Chất Lỏng (Trượt tự do trong bình) -->
+                        <div class="lg:col-span-4 bg-black/30 rounded-2xl p-3.5 border border-white/20 flex flex-col items-center">
+                            <div class="w-full flex justify-between items-center mb-2 px-1">
+                                <span class="text-xs font-bold text-cyan-200 uppercase tracking-wider">Mô phỏng phân tử</span>
+                                <span class="text-[11px] text-cyan-100 bg-cyan-500/25 border border-cyan-400/30 px-2 py-0.5 rounded-md">Trượt lên nhau • Lỏng lẻo</span>
+                            </div>
+                            <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-950/80 border border-cyan-400/40 relative shadow-inner">
+                                <canvas id="canvas-liquid" class="w-full h-full block"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Thẻ Ví Dụ Chất Lỏng -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <!-- Ví dụ 1: Nước Tinh Khiết -->
+                        <div onclick="openDetailModal('water')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-sky-800/40 to-blue-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(14,165,233,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="waterFill" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#38bdf8"/>
+                                            <stop offset="100%" stop-color="#0369a1"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M55,45 L145,45 L133,162 C132,168 127,172 121,172 L79,172 C73,172 68,168 67,162 Z" fill="rgba(255,255,255,0.15)" stroke="#e0f2fe" stroke-width="3"/>
+                                    <path d="M61,88 Q80,80 100,88 T139,88 L132,160 C131,165 127,168 121,168 L79,168 C73,168 69,165 68,160 Z" fill="url(#waterFill)"/>
+                                    <ellipse cx="100" cy="88" rx="39" ry="7" fill="#7dd3fc" opacity="0.8"/>
+                                    <circle cx="85" cy="125" r="4" fill="#ffffff" opacity="0.6"/>
+                                    <circle cx="112" cy="140" r="3" fill="#ffffff" opacity="0.5"/>
+                                    <circle cx="96" cy="110" r="2.5" fill="#ffffff" opacity="0.7"/>
+                                    <line x1="68" y1="58" x2="74" y2="152" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 1</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">1. Nước Tinh Khiết</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Chất lỏng phổ biến nhất trên Trái Đất, không màu, không mùi và chảy linh hoạt.</p>
+                            <span class="mt-auto text-xs font-semibold text-cyan-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 2: Sữa Tươi -->
+                        <div onclick="openDetailModal('milk')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-indigo-900/40 to-sky-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-500 animate-float-delayed" viewBox="0 0 200 200">
+                                    <path d="M78,34 L122,34 L122,48 L138,72 L138,166 C138,172 133,176 127,176 L73,176 C67,176 62,172 62,166 L62,72 L78,48 Z" fill="rgba(255,255,255,0.22)" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+                                    <path d="M65,92 Q82,85 100,92 T135,92 L135,165 C135,170 131,173 126,173 L74,173 C69,173 65,170 65,165 Z" fill="#f8fafc"/>
+                                    <ellipse cx="100" cy="92" rx="35" ry="6" fill="#e2e8f0"/>
+                                    <rect x="74" y="26" width="52" height="10" rx="4" fill="#38bdf8"/>
+                                    <path d="M84,128 C84,120 100,104 100,104 C100,104 116,120 116,128 C116,137 109,144 100,144 C91,144 84,137 84,128 Z" fill="#bae6fd"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 2</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">2. Sữa Tươi</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Nhũ tương lỏng giàu dinh dưỡng, luôn lấp đầy đáy và mang hình dáng của chai chứa.</p>
+                            <span class="mt-auto text-xs font-semibold text-cyan-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 3: Mật Ong -->
+                        <div onclick="openDetailModal('honey')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-amber-900/40 to-orange-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(245,158,11,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="honeyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#fbbf24"/>
+                                            <stop offset="60%" stop-color="#d97706"/>
+                                            <stop offset="100%" stop-color="#92400e"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M68,54 L132,54 C144,64 148,82 148,112 C148,148 136,170 116,172 L84,172 C64,170 52,148 52,112 C52,82 56,64 68,54 Z" fill="rgba(255,255,255,0.18)" stroke="#fde68a" stroke-width="2.5"/>
+                                    <path d="M56,96 Q78,88 100,96 T144,96 C146,136 135,166 115,169 L85,169 C65,166 54,136 56,96 Z" fill="url(#honeyGrad)"/>
+                                    <ellipse cx="100" cy="96" rx="44" ry="7" fill="#fcd34d" opacity="0.85"/>
+                                    <rect x="64" y="38" width="72" height="16" rx="6" fill="#b45309" stroke="#fde68a" stroke-width="1.5"/>
+                                    <path d="M126,54 L126,74 C126,78 120,78 120,74 L120,54 Z" fill="#fbbf24"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 3</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">3. Mật Ong</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Chất lỏng có độ nhớt cao nên chảy chậm hơn nước nhưng vẫn giữ đầy đủ tính chất thể lỏng.</p>
+                            <span class="mt-auto text-xs font-semibold text-cyan-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= SLIDE 3: CHẤT KHÍ (GAS) ================= -->
+            <section id="slide-3" class="slide-container slide-hidden w-full">
+                <div class="glass-panel rounded-3xl p-5 sm:p-8 md:p-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center mb-7">
+                        <div class="lg:col-span-8">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-400/25 border border-pink-300/40 text-pink-100 text-xs font-bold uppercase tracking-wider mb-3">
+                                Trạng Thái 03 / 03
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">
+                                Chất Khí <span class="text-pink-200 font-semibold text-2xl sm:text-3xl">(Gas)</span>
+                            </h2>
+                            <p class="text-sm sm:text-base text-white/90 leading-relaxed mb-4">
+                                Ở thể khí, các phân tử nằm cách xa nhau và chuyển động hỗn loạn rất nhanh về mọi phía. Vì lực liên kết cực kỳ yếu, chất khí dễ dàng lan tỏa chiếm toàn bộ không gian chứa nó.
+                            </p>
+                            <div class="flex flex-wrap gap-2.5">
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-pink-200">✓ Không hình dạng cố định</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-pink-200">✓ Chiếm toàn bộ bình chứa</span>
+                                <span class="px-3.5 py-1.5 rounded-xl bg-black/25 border border-white/15 text-xs sm:text-sm font-medium text-pink-200">✓ Rất dễ bị nén lại</span>
+                            </div>
+                        </div>
+
+                        <!-- Hộp Mô Phỏng Phân Tử Chất Khí (Bay hỗn loạn khắp khung) -->
+                        <div class="lg:col-span-4 bg-black/30 rounded-2xl p-3.5 border border-white/20 flex flex-col items-center">
+                            <div class="w-full flex justify-between items-center mb-2 px-1">
+                                <span class="text-xs font-bold text-pink-200 uppercase tracking-wider">Mô phỏng phân tử</span>
+                                <span class="text-[11px] text-pink-100 bg-pink-500/25 border border-pink-400/30 px-2 py-0.5 rounded-md">Cách xa • Bay hỗn loạn</span>
+                            </div>
+                            <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-950/80 border border-pink-400/40 relative shadow-inner">
+                                <canvas id="canvas-gas" class="w-full h-full block"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Thẻ Ví Dụ Chất Khí -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <!-- Ví dụ 1: Đám Mây / Hơi Nước -->
+                        <div onclick="openDetailModal('steam')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-purple-900/40 to-fuchsia-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(244,114,182,0.4)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stop-color="#ffffff"/>
+                                            <stop offset="100%" stop-color="#e9d5ff"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M55,135 L148,135 C166,135 178,122 178,105 C178,90 167,78 152,76 C147,54 127,38 103,38 C81,38 62,52 56,72 C38,75 24,90 24,108 C24,124 38,135 55,135 Z" fill="url(#cloudGrad)"/>
+                                    <path d="M68,150 Q62,160 68,170" fill="none" stroke="#f5d0fe" stroke-width="3" stroke-linecap="round"/>
+                                    <path d="M100,148 Q94,158 100,168" fill="none" stroke="#f5d0fe" stroke-width="3" stroke-linecap="round"/>
+                                    <path d="M132,150 Q126,160 132,170" fill="none" stroke="#f5d0fe" stroke-width="3" stroke-linecap="round"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 1</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">1. Đám Mây / Hơi Nước</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Nước bay hơi khi gặp nhiệt độ cao, khuếch tán nhẹ nhàng vào bầu khí quyển.</p>
+                            <span class="mt-auto text-xs font-semibold text-pink-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 2: Bóng Bay Khí Heli -->
+                        <div onclick="openDetailModal('helium')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-pink-900/40 to-rose-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(244,63,94,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float-delayed" viewBox="0 0 200 200">
+                                    <defs>
+                                        <radialGradient id="balloonGrad" cx="35%" cy="30%" r="65%">
+                                            <stop offset="0%" stop-color="#fda4af"/>
+                                            <stop offset="50%" stop-color="#f43f5e"/>
+                                            <stop offset="100%" stop-color="#881337"/>
+                                        </radialGradient>
+                                    </defs>
+                                    <path d="M100,136 Q92,154 104,168 T98,190" fill="none" stroke="#fecdd3" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M100,24 C66,24 44,50 44,82 C44,112 72,130 94,134 L90,141 L110,141 L106,134 C128,130 156,112 156,82 C156,50 134,24 100,24 Z" fill="url(#balloonGrad)"/>
+                                    <ellipse cx="76" cy="58" rx="10" ry="20" transform="rotate(-25 76 58)" fill="#ffffff" opacity="0.45"/>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 2</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">2. Bóng Bay Khí Heli</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Khí Heli nhẹ hơn không khí xung quanh nên giúp quả bóng bay lơ lửng lên cao.</p>
+                            <span class="mt-auto text-xs font-semibold text-pink-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+
+                        <!-- Ví dụ 3: Bình Nén Khí Oxy -->
+                        <div onclick="openDetailModal('oxygen')" class="cursor-pointer glass-card rounded-2xl p-5 flex flex-col items-center text-center group">
+                            <div class="w-full h-40 rounded-xl bg-gradient-to-b from-indigo-900/40 to-purple-950/60 border border-white/15 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <svg class="w-32 h-32 drop-shadow-[0_12px_20px_rgba(168,85,247,0.45)] group-hover:scale-110 transition-transform duration-500 animate-float" viewBox="0 0 200 200">
+                                    <defs>
+                                        <linearGradient id="tankGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#38bdf8"/>
+                                            <stop offset="40%" stop-color="#0284c7"/>
+                                            <stop offset="100%" stop-color="#1e3a8a"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <rect x="92" y="26" width="16" height="18" rx="2" fill="#cbd5e1"/>
+                                    <rect x="82" y="22" width="36" height="7" rx="3" fill="#f8fafc"/>
+                                    <circle cx="118" cy="35" r="8" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                                    <line x1="118" y1="35" x2="122" y2="31" stroke="#ef4444" stroke-width="2"/>
+                                    <path d="M68,72 C68,52 82,44 100,44 C118,44 132,52 132,72 L132,164 C132,172 126,178 118,178 L82,178 C74,178 68,172 68,164 Z" fill="url(#tankGrad)" stroke="#bae6fd" stroke-width="2"/>
+                                    <rect x="82" y="64" width="10" height="98" rx="5" fill="#ffffff" opacity="0.25"/>
+                                    <text x="100" y="122" text-anchor="middle" fill="#ffffff" font-family="Be Vietnam Pro, sans-serif" font-weight="800" font-size="24">O₂</text>
+                                </svg>
+                                <span class="absolute top-2.5 right-2.5 text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full text-white/90">Ví dụ 3</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-1">3. Bình Nén Khí Oxy</h3>
+                            <p class="text-xs sm:text-sm text-white/75 mb-3">Minh họa tính chất dễ bị nén của chất khí: lượng lớn khí Oxy được nén gọn vào bình.</p>
+                            <span class="mt-auto text-xs font-semibold text-pink-200 group-hover:underline">Bấm để xem chi tiết →</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- THANH ĐIỀU HƯỚNG DƯỚI CÙNG (Đã xóa chấm chỉ báo & chữ Trang Mở Đầu) -->
+    <footer class="relative z-20 w-full px-4 sm:px-8 pb-5 pt-2 flex items-center justify-center">
+        <div class="glass-panel rounded-2xl px-4 py-2.5 flex items-center gap-3">
+            <button id="btn-prev" onclick="prevSlide()" class="px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 disabled:opacity-35 disabled:pointer-events-none transition-all flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Trước</span>
+            </button>
+
+            <button id="btn-next" onclick="nextSlide()" class="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-cyan-50 disabled:opacity-35 disabled:pointer-events-none transition-all flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-md">
+                <span>Tiếp Theo</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+    </footer>
+
+    <!-- HỘP THOẠI XEM CHI TIẾT VÍ DỤ (MODAL) -->
+    <div id="detail-modal" onclick="closeDetailModal(event)" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md hidden items-center justify-center p-4 transition-opacity">
+        <div onclick="event.stopPropagation()" class="glass-panel bg-slate-900/90 border border-white/30 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-white shadow-2xl transform transition-all">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <span id="modal-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/15 text-cyan-200 mb-2">Chất Rắn</span>
+                    <h3 id="modal-title" class="text-2xl sm:text-3xl font-extrabold">Viên Kim Cương</h3>
+                </div>
+                <button onclick="closeDetailModal()" class="p-2 rounded-xl bg-white/10 hover:bg-white/25 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <p id="modal-desc" class="text-sm sm:text-base text-white/90 leading-relaxed mb-5"></p>
+            <div class="bg-black/30 rounded-2xl p-4 border border-white/15 mb-6">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-200 mb-2">Giải thích khoa học</h4>
+                <p id="modal-science" class="text-xs sm:text-sm text-white/80 leading-relaxed"></p>
+            </div>
+            <button onclick="closeDetailModal()" class="w-full py-3 rounded-xl bg-white text-slate-900 font-bold text-sm hover:bg-cyan-50 transition">
+                Đã Hiểu
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ĐIỀU KHIỂN SLIDE & MÔ PHỎNG PHÂN TỬ -->
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 4;
+
+        // Dữ liệu giải thích chi tiết từng ví dụ
+        const examplesData = {
+            diamond: {
+                badge: 'Chất Rắn • Tinh Thể',
+                title: '1. Viên Kim Cương',
+                desc: 'Kim cương là một dạng thù hình của nguyên tố Cacbon và là khoáng vật tự nhiên cứng nhất từng được biết đến.',
+                science: 'Mỗi nguyên tử cacbon liên kết cộng hóa trị cực kỳ bền chặt với 4 nguyên tử cacbon lân cận theo cấu trúc tứ diện đều, tạo nên mạng tinh thể rắn chắc không thể biến dạng.'
+            },
+            ice: {
+                badge: 'Chất Rắn • Đông Đặc',
+                title: '2. Khối Băng Đá',
+                desc: 'Khi hạ nhiệt độ của nước xuống từ 0°C trở xuống, nước chuyển từ thể lỏng sang thể rắn tạo thành nước đá.',
+                science: 'Các phân tử H₂O sắp xếp thành mạng tinh thể lục giác cố định và chỉ dao động nhẹ tại chỗ, giúp khối băng giữ nguyên hình dạng và thể tích.'
+            },
+            iron: {
+                badge: 'Chất Rắn • Kim Loại',
+                title: '3. Thanh Sắt / Kim Loại',
+                desc: 'Sắt và các kim loại phổ biến tồn tại ở thể rắn trong điều kiện nhiệt độ phòng, có ánh kim và độ bền cơ học cao.',
+                science: 'Các ion dương kim loại xếp khít trong mạng tinh thể với các electron tự do bao quanh, giúp thanh sắt rắn chắc và dẫn nhiệt, dẫn điện tốt.'
+            },
+            water: {
+                badge: 'Chất Lỏng • Phổ Biến Nhất',
+                title: '1. Nước Tinh Khiết',
+                desc: 'Nước ở nhiệt độ thường (từ 0°C đến 100°C) là chất lỏng không màu, không mùi, không vị và duy trì sự sống.',
+                science: 'Liên kết hydro giữa các phân tử nước liên tục hình thành và đứt gãy, cho phép các phân tử trượt lên nhau để nước chảy tự do và mang hình dạng bình chứa.'
+            },
+            milk: {
+                badge: 'Chất Lỏng • Dinh Dưỡng',
+                title: '2. Sữa Tươi',
+                desc: 'Sữa tươi là một chất lỏng màu trắng đục chứa nước, chất béo, protein, đường lactose và khoáng chất.',
+                science: 'Dù chứa các hạt cầu béo và protein lơ lửng (hệ nhũ tương), các phân tử nước chiếm đa số giúp sữa chảy linh hoạt và không có hình dạng riêng.'
+            },
+            honey: {
+                badge: 'Chất Lỏng • Độ Nhớt Cao',
+                title: '3. Mật Ong',
+                desc: 'Mật ong là chất lỏng sánh đặc, có vị ngọt tự nhiên được ong tạo ra từ mật hoa.',
+                science: 'Do chứa hàm lượng đường hòa tan rất cao, lực ma sát giữa các phân tử lớn khiến mật ong chảy chậm (độ nhớt cao) nhưng vẫn là chất lỏng.'
+            },
+            steam: {
+                badge: 'Chất Khí • Bay Hơi',
+                title: '1. Đám Mây / Hơi Nước',
+                desc: 'Khi nước nhận nhiệt lượng sẽ bay hơi thành thể khí vô hình, bay lên cao gặp lạnh ngưng tụ thành những đám mây.',
+                science: 'Ở thể khí, các phân tử H₂O hấp thụ đủ năng lượng để thoát khỏi lực hút lẫn nhau, chuyển động tự do với tốc độ cao vào không gian.'
+            },
+            helium: {
+                badge: 'Chất Khí • Khí Hiếm Nhẹ',
+                title: '2. Bóng Bay Khí Heli',
+                desc: 'Khí Heli (He) là một chất khí không màu, không mùi, an toàn và nhẹ hơn không khí rất nhiều.',
+                science: 'Các nguyên tử Heli chuyển động hỗn loạn va chạm đều lên thành bóng bay từ bên trong, giữ bóng căng tròn và tạo lực đẩy Ác-si-mét nâng bóng bay lên.'
+            },
+            oxygen: {
+                badge: 'Chất Khí • Dễ Bị Nén',
+                title: '3. Bình Nén Khí Oxy',
+                desc: 'Khí Oxy (O₂) được nén dưới áp suất cao vào các bình kim loại chuyên dụng phục vụ y tế và lặn biển.',
+                science: 'Vì khoảng cách giữa các phân tử khí rất lớn so với kích thước của chúng, ta có thể ép hàng trăm lít khí Oxy vào trong một chiếc bình nhỏ gọn.'
+            }
+        };
+
+        // Hàm cập nhật giao diện Slide
+        function updateUI() {
+            const body = document.getElementById('app-body');
+            body.className = `bg-theme-${currentSlide} text-white min-h-screen flex flex-col justify-between transition-colors duration-1000 relative`;
+
+            for (let i = 0; i < totalSlides; i++) {
+                const slideEl = document.getElementById(`slide-${i}`);
+                if (i === currentSlide) {
+                    slideEl.classList.remove('slide-hidden');
+                    slideEl.classList.add('slide-active');
+                } else {
+                    slideEl.classList.remove('slide-active');
+                    slideEl.classList.add('slide-hidden');
+                }
+            }
+
+            document.getElementById('btn-prev').disabled = currentSlide === 0;
+            document.getElementById('btn-next').disabled = currentSlide === totalSlides - 1;
+
+            // Đảm bảo canvas mô phỏng nhận đúng kích thước khi slide mở ra
+            setTimeout(() => {
+                if (window.resizeAllSimulations) window.resizeAllSimulations();
+            }, 50);
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                currentSlide = index;
+                updateUI();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateUI();
+            }
+        }
+
+        // Điều khiển bàn phím
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('detail-modal').classList.contains('hidden')) {
+                if (e.key === 'Escape') closeDetailModal();
+                return;
+            }
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Vuốt cảm ứng
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        }, { passive: true });
+
+        // Toàn màn hình
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Modal Chi tiết
+        function openDetailModal(key) {
+            const data = examplesData[key];
+            if (!data) return;
+            document.getElementById('modal-badge').textContent = data.badge;
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-desc').textContent = data.desc;
+            document.getElementById('modal-science').textContent = data.science;
+
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // =========================================================================
+        // MÔ PHỎNG PHÂN TỬ CHUYÊN SÂU (RẮN - LỎNG - KHÍ)
+        // =========================================================================
+        function initMoleculeSimulations() {
+            // 1. MÔ PHỎNG CHẤT RẮN: Mạng tinh thể đều đặn, có đường nối liên kết, rung nhẹ tại chỗ
+            const solidCanvas = document.getElementById('canvas-solid');
+            const sCtx = solidCanvas.getContext('2d');
+            let solidMolecules = [];
+
+            function setupSolid() {
+                const w = solidCanvas.width = solidCanvas.parentElement.clientWidth || 320;
+                const h = solidCanvas.height = solidCanvas.parentElement.clientHeight || 144;
+                solidMolecules = [];
+                const cols = 7;
+                const rows = 4;
+                const spacingX = 32;
+                const spacingY = 26;
+                const startX = (w - (cols - 1) * spacingX) / 2;
+                const startY = (h - (rows - 1) * spacingY) / 2;
+
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        solidMolecules.push({
+                            row: r,
+                            col: c,
+                            baseX: startX + c * spacingX,
+                            baseY: startY + r * spacingY,
+                            x: 0,
+                            y: 0,
+                            phase: (r * cols + c) * 0.7
+                        });
+                    }
+                }
+            }
+
+            // 2. MÔ PHỎNG CHẤT LỎNG: Các phân tử tập trung ở nửa dưới, trượt tự do lên nhau và va chạm mềm
+            const liquidCanvas = document.getElementById('canvas-liquid');
+            const lCtx = liquidCanvas.getContext('2d');
+            let liquidMolecules = [];
+
+            function setupLiquid() {
+                const w = liquidCanvas.width = liquidCanvas.parentElement.clientWidth || 320;
+                const h = liquidCanvas.height = liquidCanvas.parentElement.clientHeight || 144;
+                liquidMolecules = [];
+                const count = 34;
+                for (let i = 0; i < count; i++) {
+                    liquidMolecules.push({
+                        x: 16 + Math.random() * (w - 32),
+                        y: h * 0.42 + Math.random() * (h * 0.5),
+                        vx: (Math.random() - 0.5) * 1.8,
+                        vy: (Math.random() - 0.5) * 0.9,
+                        radius: 6.5
+                    });
+                }
+            }
+
+            // 3. MÔ PHỎNG CHẤT KHÍ: Ít phân tử, cách xa nhau, bay tốc độ cao khắp khung và nảy đàn hồi
+            const gasCanvas = document.getElementById('canvas-gas');
+            const gCtx = gasCanvas.getContext('2d');
+            let gasMolecules = [];
+
+            function setupGas() {
+                const w = gasCanvas.width = gasCanvas.parentElement.clientWidth || 320;
+                const h = gasCanvas.height = gasCanvas.parentElement.clientHeight || 144;
+                gasMolecules = [];
+                const count = 12;
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2.6 + Math.random() * 1.8;
+                    gasMolecules.push({
+                        x: 20 + Math.random() * (w - 40),
+                        y: 20 + Math.random() * (h - 40),
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 6.5,
+                        trail: []
+                    });
+                }
+            }
+
+            window.resizeAllSimulations = () => {
+                setupSolid();
+                setupLiquid();
+                setupGas();
+            };
+
+            window.resizeAllSimulations();
+            window.addEventListener('resize', window.resizeAllSimulations);
+
+            // Hàm vẽ hạt phân tử 3D phát sáng đẹp mắt
+            function drawAtom(ctx, x, y, r, colorMain, colorLight, colorGlow) {
+                ctx.save();
+                ctx.shadowColor = colorGlow;
+                ctx.shadowBlur = 8;
+                const grad = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+                grad.addColorStop(0, colorLight);
+                grad.addColorStop(0.65, colorMain);
+                grad.addColorStop(1, '#0f172a');
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            let time = 0;
+            function animateMolecules() {
+                time += 0.16;
+
+                // --- VẼ CHẤT RẮN ---
+                const sw = solidCanvas.width;
+                const sh = solidCanvas.height;
+                sCtx.clearRect(0, 0, sw, sh);
+
+                // Cập nhật vị trí rung nhẹ tại chỗ
+                solidMolecules.forEach(m => {
+                    m.x = m.baseX + Math.sin(time * 2.2 + m.phase) * 1.4;
+                    m.y = m.baseY + Math.cos(time * 2.5 + m.phase) * 1.4;
+                });
+
+                // Vẽ đường nối liên kết tinh thể giữa các phân tử lân cận
+                sCtx.strokeStyle = 'rgba(52, 211, 153, 0.35)';
+                sCtx.lineWidth = 1.5;
+                for (let i = 0; i < solidMolecules.length; i++) {
+                    for (let j = i + 1; j < solidMolecules.length; j++) {
+                        const a = solidMolecules[i];
+                        const b = solidMolecules[j];
+                        if (Math.abs(a.row - b.row) + Math.abs(a.col - b.col) === 1) {
+                            sCtx.beginPath();
+                            sCtx.moveTo(a.x, a.y);
+                            sCtx.lineTo(b.x, b.y);
+                            sCtx.stroke();
+                        }
+                    }
+                }
+
+                // Vẽ các hạt phân tử chất rắn
+                solidMolecules.forEach(m => {
+                    drawAtom(sCtx, m.x, m.y, 7, '#10b981', '#a7f3d0', 'rgba(16, 185, 129, 0.7)');
+                });
+
+                // --- VẼ CHẤT LỎNG ---
+                const lw = liquidCanvas.width;
+                const lh = liquidCanvas.height;
+                lCtx.clearRect(0, 0, lw, lh);
+
+                // Vẽ mặt thoáng chất lỏng gợn sóng nhẹ
+                lCtx.fillStyle = 'rgba(14, 165, 233, 0.14)';
+                lCtx.beginPath();
+                lCtx.moveTo(0, lh);
+                for (let x = 0; x <= lw; x += 10) {
+                    const waveY = lh * 0.36 + Math.sin(x * 0.04 + time * 0.4) * 3;
+                    lCtx.lineTo(x, waveY);
+                }
+                lCtx.lineTo(lw, lh);
+                lCtx.closePath();
+                lCtx.fill();
+
+                // Va chạm đẩy nhẹ để phân tử chất lỏng trượt qua nhau mà không chồng chéo
+                for (let i = 0; i < liquidMolecules.length; i++) {
+                    const m1 = liquidMolecules[i];
+                    for (let j = i + 1; j < liquidMolecules.length; j++) {
+                        const m2 = liquidMolecules[j];
+                        const dx = m2.x - m1.x;
+                        const dy = m2.y - m1.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = m1.radius + m2.radius + 2;
+                        if (dist > 0 && dist < minDist) {
+                            const force = (minDist - dist) * 0.08;
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            m1.vx -= nx * force;
+                            m1.vy -= ny * force;
+                            m2.vx += nx * force;
+                            m2.vy += ny * force;
+                        }
+                    }
+                }
+
+                liquidMolecules.forEach(m => {
+                    // Trọng lực nhẹ giữ chất lỏng ở nửa dưới
+                    m.vy += 0.04;
+                    m.vx *= 0.985;
+                    m.vy *= 0.985;
+
+                    // Thêm chuyển động trượt ngang tự nhiên
+                    m.vx += (Math.random() - 0.5) * 0.12;
+                    m.x += m.vx;
+                    m.y += m.vy;
+
+                    const topLimit = lh * 0.36;
+                    if (m.x < m.radius + 4) { m.x = m.radius + 4; m.vx *= -0.8; }
+                    if (m.x > lw - m.radius - 4) { m.x = lw - m.radius - 4; m.vx *= -0.8; }
+                    if (m.y < topLimit) { m.y = topLimit; m.vy = Math.abs(m.vy) * 0.6; }
+                    if (m.y > lh - m.radius - 4) { m.y = lh - m.radius - 4; m.vy *= -0.7; }
+
+                    drawAtom(lCtx, m.x, m.y, m.radius, '#0284c7', '#bae6fd', 'rgba(56, 189, 248, 0.7)');
+                });
+
+                // --- VẼ CHẤT KHÍ ---
+                const gw = gasCanvas.width;
+                const gh = gasCanvas.height;
+                gCtx.clearRect(0, 0, gw, gh);
+
+                gasMolecules.forEach((m, idx) => {
+                    // Lưu vệt chuyển động (motion trail)
+                    m.trail.push({ x: m.x, y: m.y });
+                    if (m.trail.length > 7) m.trail.shift();
+
+                    m.x += m.vx;
+                    m.y += m.vy;
+
+                    // Nảy đàn hồi khi chạm thành bình
+                    if (m.x < m.radius + 3) { m.x = m.radius + 3; m.vx *= -1; }
+                    if (m.x > gw - m.radius - 3) { m.x = gw - m.radius - 3; m.vx *= -1; }
+                    if (m.y < m.radius + 3) { m.y = m.radius + 3; m.vy *= -1; }
+                    if (m.y > gh - m.radius - 3) { m.y = gh - m.radius - 3; m.vy *= -1; }
+
+                    // Va chạm đàn hồi giữa 2 phân tử khí
+                    for (let j = idx + 1; j < gasMolecules.length; j++) {
+                        const m2 = gasMolecules[j];
+                        const dx = m2.x - m.x;
+                        const dy = m2.y - m.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = m.radius + m2.radius;
+                        if (dist > 0 && dist < minDist) {
+                            const tempVx = m.vx;
+                            const tempVy = m.vy;
+                            m.vx = m2.vx;
+                            m.vy = m2.vy;
+                            m2.vx = tempVx;
+                            m2.vy = tempVy;
+                        }
+                    }
+
+                    // Vẽ đuôi chuyển động tốc độ cao
+                    if (m.trail.length > 1) {
+                        gCtx.beginPath();
+                        gCtx.moveTo(m.trail[0].x, m.trail[0].y);
+                        for (let t = 1; t < m.trail.length; t++) {
+                            gCtx.lineTo(m.trail[t].x, m.trail[t].y);
+                        }
+                        gCtx.strokeStyle = 'rgba(244, 114, 182, 0.35)';
+                        gCtx.lineWidth = 3;
+                        gCtx.lineCap = 'round';
+                        gCtx.stroke();
+                    }
+
+                    drawAtom(gCtx, m.x, m.y, m.radius, '#ec4899', '#fbcfe8', 'rgba(244, 114, 182, 0.85)');
+                });
+
+                requestAnimationFrame(animateMolecules);
+            }
+            animateMolecules();
+        }
+
+        // Hạt nền trang trí nhẹ nhàng
+        function initBackgroundParticles() {
+            const canvas = document.getElementById('bg-particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const bgParticles = Array.from({ length: 32 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: Math.random() * 2.5 + 1,
+                vx: (Math.random() - 0.5) * 0.6,
+                vy: (Math.random() - 0.5) * 0.6,
+                alpha: Math.random() * 0.3 + 0.1
+            }));
+
+            function renderBg() {
+                ctx.clearRect(0, 0, width, height);
+                bgParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(renderBg);
+            }
+            renderBg();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            initMoleculeSimulations();
+            initBackgroundParticles();
+        });
+    </script>
+</body>
+</html>
